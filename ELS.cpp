@@ -14,45 +14,132 @@ ELS::~ELS()
 
 int ELS::run()
 {
+	//创建界面
+	initgraph(600, 800,1);
+	//设置背景图案
+	rectangle(PX_X, PX_Y, PX_X+PX_W, PX_Y+PX_H);
+	BeginBatchDraw();
+	int stime = 0;
+	int stime2 = 0;
 
+	int wtime = 0;
+	int wtime2 = 0;
 CREAT://创建方块
 	if (createBox())
 		goto END;
 	while (1)
 	{
-		//画面更新
-		update();
+		FlushBatchDraw();
+		if (wtime2 > 1000/FPS)
+		{
+			//画面更新
+			update();
+			stime2 = GetTickCount();
+		}
+		wtime2 = GetTickCount() - stime2;
 		//玩家操作
 		move();
-		//固定方块
-		if (curBox())
-			goto CREAT;
-		//更新地图（不绘制）
-		update_map();
+		
+		if (wtime > 500)
+		{
+			//固定方块
+			if (curBox())
+				goto CREAT;
+			//更新地图（不绘制）
+			update_map();
+			stime = GetTickCount();
+		}
+		wtime = GetTickCount() - stime;
+
+
 	}
 END:
+	EndBatchDraw();
 	return 0;
 }
 
+
 int ELS::move()
 {
-	cin >> input;
-	runBox(input);
+	//cin >> input;
+	ExMessage msg;
+	while (peekmessage(&msg))
+	{
+		if (msg.prevdown)
+		{
+
+			switch (msg.vkcode)
+			{
+			case 'W':
+				runBox('w');
+				break;
+			case 'S':
+				runBox('s');
+				break;
+			case 'D':
+				runBox('d');
+				break;
+			case 'A':
+				runBox('a');
+				break;
+			}
+		}
+	}
 	return 0;
 }
 
 int ELS::update()
 {
 
-	system("cls");
+	//system("cls");
+	//for (int y = 0; y < MAP_H; y++)
+	//{
+	//	for (int x = 0; x < MAP_W; x++)
+	//	{
+	//		std::cout << " " << gamemap[y][x];
+	//	}
+	//	std::cout << std::endl;
+	//}
+	setlinecolor(WHITE);
+	setfillcolor(GREEN);
+	fillrectangle(PX_X, PX_Y, PX_X+PX_W, PX_Y+PX_H);
+
+	for (int y = 0; y < MAP_H; y++)
+	{
+		line(PX_X,        PX_Y + y * D_S,
+			 PX_X + PX_W, PX_Y + y * D_S);
+	}
+	for (int x = 0; x < MAP_W; x++)
+	{
+		line(PX_X + x * D_S , PX_Y,
+			 PX_X + x * D_S , PX_Y + PX_H);
+	}
 	for (int y = 0; y < MAP_H; y++)
 	{
 		for (int x = 0; x < MAP_W; x++)
 		{
-			std::cout << " " << gamemap[y][x];
+			if (gamemap[y][x] == 1)
+			{
+				setfillcolor(RED);
+				fillrectangle(
+					PX_X + x * D_S,
+					PX_Y + y * D_S,
+					PX_X + (x + 1) * D_S,
+					PX_Y + (y + 1) * D_S);
+			}
+			else if (gamemap[y][x] == 2)
+			{
+				setfillcolor(YELLOW);
+				fillrectangle(
+					PX_X + x * D_S,
+					PX_Y + y * D_S,
+					PX_X + (x + 1) * D_S,
+					PX_Y + (y + 1) * D_S);
+			}
 		}
-		std::cout << std::endl;
+
 	}
+
 	return 0;
 }
 
@@ -128,6 +215,7 @@ int ELS::update_map()
 		gamemap[z.y+1][z.x] = 1;
 		(z.y)++;
 	}
+
 	return 0;
 }
 
@@ -175,6 +263,26 @@ int ELS::runBox(char c)
 	else if (c == 'w')
 	{
 		spinBox();
+		restart();
+		update_map();
+	}
+	else if (c == 's')
+	{
+		update_map();
+	}
+
+	return 0;
+}
+
+int ELS::restart()
+{
+	for (int y = 0; y < MAP_H; y++)
+	{
+		for (int x = 0; x < MAP_W; x++)
+		{
+			if (gamemap[y][x] == 1)
+				gamemap[y][x] = 0;
+		}
 	}
 	return 0;
 }
@@ -219,7 +327,7 @@ int ELS::spinBox()
 			if (x + x2 >= MAP_W || x + x2 < 0)
 				return 1;
 			//_map[y2][x2] = this->gamemap[y + y2][x + x2];
-			_map3.push_back(this->gamemap[y + y2][x + x2]);
+			_map3.push_back(gamemap[y + y2][x + x2]);
 			//std::cout << " " << _map[y2][x2];
 		}
 		_map2.push_back(_map3);
@@ -260,6 +368,7 @@ int ELS::spinBox()
 			}
 		}
 	}
+	//ZeroMemory(gamemap,sizeof(gamemap));
 	//system("pause");
 	return 0;
 }

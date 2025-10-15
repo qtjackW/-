@@ -9,6 +9,16 @@ using namespace std;
 #define MAP_W 15
 #define MAP_H 30
 #define BOX_S 5
+#define FPS 12
+
+#define PX_X 20
+#define PX_Y 20
+#define D_S 25
+#define PX_W D_S*MAP_W
+#define PX_H D_S*MAP_H
+#define PX_VALUE 2
+
+
 
 class ELS
 {
@@ -24,6 +34,7 @@ private:
 	int createBox();	//创建方块
 	int update_map();	//更新地图（不绘制）
 	int runBox(char c);		//运动方块
+	int restart();
 	int spinBox();
 	int re(vector<vector<int>> &map,int rex, int rey, int reS, int resize, int rereg = 1, int reValue = -1);
 	
