@@ -38,7 +38,12 @@ CREAT://创建方块
 		}
 		wtime2 = GetTickCount() - stime2;
 		//玩家操作
-		move();
+		if (move() == 2)
+		{
+			if (curBox())
+				goto CREAT;
+			update_map();
+		}
 		
 		if (wtime > 500)
 		{
@@ -62,6 +67,7 @@ END:
 int ELS::move()
 {
 	//cin >> input;
+	int ret = 0; 
 	ExMessage msg;
 	while (peekmessage(&msg))
 	{
@@ -71,21 +77,21 @@ int ELS::move()
 			switch (msg.vkcode)
 			{
 			case 'W':
-				runBox('w');
+				ret = runBox('w');
 				break;
 			case 'S':
-				runBox('s');
+				ret = runBox('s');
 				break;
 			case 'D':
-				runBox('d');
+				ret = runBox('d');
 				break;
 			case 'A':
-				runBox('a');
+				ret = runBox('a');
 				break;
 			}
 		}
 	}
-	return 0;
+	return ret;
 }
 
 int ELS::update()
@@ -264,11 +270,11 @@ int ELS::runBox(char c)
 	{
 		spinBox();
 		restart();
-		update_map();
+		update();
 	}
 	else if (c == 's')
 	{
-		update_map();
+		return 2;
 	}
 
 	return 0;
@@ -283,6 +289,10 @@ int ELS::restart()
 			if (gamemap[y][x] == 1)
 				gamemap[y][x] = 0;
 		}
+	}
+	for (auto& z : po)
+	{
+		gamemap[z.y][z.x] = 1;
 	}
 	return 0;
 }
