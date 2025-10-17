@@ -24,7 +24,9 @@ int ELS::run()
 
 	int wtime = 0;
 	int wtime2 = 0;
+	createBox();
 CREAT://创建方块
+	clearLine();
 	if (createBox())
 		goto END;
 	while (1)
@@ -126,7 +128,7 @@ int ELS::update()
 		{
 			if (gamemap[y][x] == 1)
 			{
-				setfillcolor(RED);
+				setfillcolor(color_[cr_col]);
 				fillrectangle(
 					PX_X + x * D_S,
 					PX_Y + y * D_S,
@@ -135,7 +137,7 @@ int ELS::update()
 			}
 			else if (gamemap[y][x] == 2)
 			{
-				setfillcolor(YELLOW);
+				setfillcolor(color_[gamemap_color[y][x]]);
 				fillrectangle(
 					PX_X + x * D_S,
 					PX_Y + y * D_S,
@@ -165,6 +167,7 @@ CUR:
 	for (auto& z : po)
 	{
 		gamemap[z.y][z.x] = 2;
+		gamemap_color[z.y][z.x] = cr_col;
 	}
 	po.clear();
 	return 1;
@@ -174,9 +177,14 @@ CUR:
 int ELS::createBox()
 {
 	//test
-	cr_box = 0;
-	cr_reg = 0;//fix
-	cr_col = 0;//fix
+	cr_box = ne_box;
+	cr_reg = ne_reg;//fix
+	cr_col = ne_col;//fix
+
+	srand(time(NULL));
+	ne_box = rand() % BOX_SIZE;
+	ne_reg = 0;//fix
+	ne_col = rand() % COLOR_SIZE;//fix
 
 	//设置自己的方块的同时 查看能否创建方块 并且创建一个方块
 
@@ -192,13 +200,13 @@ int ELS::createBox()
 	}
 
 	//创建一个方块
-
+	po.clear();
 	for (int y = 0; y < BOX_S; y++)
 	{
 		for (int x = 0; x < BOX_S; x++)
 		{
 			//gamemap[y][x+5] = boxs[0][y][x]; 
-			if (boxs[0][y][x] == 1)
+			if (boxs[cr_box][y][x] == 1)
 			{
 				po.push_back(ELS::PO(y,x+5));
 			}
@@ -324,7 +332,8 @@ int ELS::spinBox()
 	h = max_y - y;  // 修正：用最大值减最小值
 
 	box_size = w > h ? w : h;
-
+	if (box_size % 2 != 0)
+		box_size++;
 	//提取方块
 	vector<vector<int>> _map2;
 	for (int y2 = 0; y2 <= box_size; y2++)
@@ -336,22 +345,12 @@ int ELS::spinBox()
 				return 1;
 			if (x + x2 >= MAP_W || x + x2 < 0)
 				return 1;
-			//_map[y2][x2] = this->gamemap[y + y2][x + x2];
 			_map3.push_back(gamemap[y + y2][x + x2]);
-			//std::cout << " " << _map[y2][x2];
 		}
 		_map2.push_back(_map3);
 		//std::cout << std::endl;
 	}
 	re(_map2, box_size/2, box_size/2,box_size,_map2.size(),box_size);
-	for (auto& z : _map2)
-	{
-		for (auto& i : z)
-		{
-			std::cout << " " <<i;
-		}
-		std::cout << std::endl;
-	}
 	//验证方块位置是否合法
 	for (int y2 = 0; y2 <= box_size; y2++)
 	{
@@ -378,8 +377,37 @@ int ELS::spinBox()
 			}
 		}
 	}
-	//ZeroMemory(gamemap,sizeof(gamemap));
-	//system("pause");
+	return 0;
+}
+
+int ELS::clearLine()
+{
+	for (int y = BOX_SIZE; y < MAP_H; y++)
+	{
+		int isclear = 1;
+		for (int x = 0; x < MAP_W; x++)
+		{
+			if (gamemap[y][x] == 0)
+			{
+				isclear = 0;
+				break;
+			}
+		}
+		if (isclear)
+		{
+			//将上面的往下面复制
+			for (int i = y; i>1; i--)
+			{
+				for (int x = 0; x < MAP_W; x++)
+				{
+					gamemap[i][x] = gamemap[i - 1][x];
+					gamemap_color[i][x] = gamemap_color[i - 1][x];
+				}
+			}
+
+			return 0;
+		}
+	}
 	return 0;
 }
 
