@@ -20,6 +20,8 @@ using namespace std;
 #define PX_H D_S*MAP_H
 #define PX_VALUE 2
 
+#define UI_X 450
+#define UI_Y 20
 
 class ELS
 {
@@ -31,6 +33,7 @@ public:
 private:
 	int move();			//移动（玩家操作）
 	int update();		//更新地图
+	int update_ui();	//更新ui
 	int curBox();		//固化方块
 	int createBox();	//创建方块
 	int update_map();	//更新地图（不绘制）
@@ -54,7 +57,7 @@ private:
 private:
 	int gamemap[MAP_H][MAP_W] = { 0 };
 	int gamemap_color[MAP_H][MAP_W] = { 0 };
-	int color_[COLOR_SIZE] = { RED,BLUE,BLACK,LIGHTCYAN,DARKGRAY };
+	int color_[COLOR_SIZE] = { RED,BLUE,YELLOW,LIGHTCYAN,DARKGRAY };
 	
 	int cr_box = 0;
 	int cr_reg = 0;
@@ -63,6 +66,9 @@ private:
 	int ne_box = 0;
 	int ne_reg = 0;
 	int ne_col = 0;
+
+	int score = 0;
+	int level = 0;
 
 
 	int box_size = 1;

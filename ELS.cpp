@@ -15,7 +15,7 @@ ELS::~ELS()
 int ELS::run()
 {
 	//创建界面
-	initgraph(600, 800,1);
+	initgraph(600, 800);
 	//设置背景图案
 	rectangle(PX_X, PX_Y, PX_X+PX_W, PX_Y+PX_H);
 	BeginBatchDraw();
@@ -36,6 +36,7 @@ CREAT://创建方块
 		{
 			//画面更新
 			update();
+			update_ui();
 			stime2 = GetTickCount();
 		}
 		wtime2 = GetTickCount() - stime2;
@@ -119,6 +120,10 @@ int ELS::update()
 	}
 	for (int x = 0; x < MAP_W; x++)
 	{
+		if (x % 2 == 0)
+			setlinecolor(BLACK);
+		else
+			setlinecolor(WHITE);
 		line(PX_X + x * D_S , PX_Y,
 			 PX_X + x * D_S , PX_Y + PX_H);
 	}
@@ -148,6 +153,44 @@ int ELS::update()
 
 	}
 
+	return 0;
+}
+
+int ELS::update_ui()
+{
+	//下一个方块预览
+	setlinecolor(WHITE);
+	rectangle(UI_X,UI_Y,UI_X+D_S* BOX_S,UI_Y+D_S* BOX_S);
+	setfillcolor(GREEN);
+	fillrectangle(UI_X, UI_Y, UI_X + D_S * BOX_S, UI_Y + D_S * BOX_S);
+	 
+	//根据 ne_box 和 ne_col 来绘制下一个方块
+	for (int y = 0; y < BOX_S; y++)
+	{
+		for (int x = 0; x < BOX_S; x++)
+		{
+			if (boxs[ne_box][y][x] == 1)
+			{
+				setfillcolor(color_[ne_col]);
+				fillrectangle(
+					UI_X + D_S * x,
+					UI_Y + D_S * y,
+					UI_X + D_S * (x+1),
+					UI_Y + D_S * (y+1));
+			}
+		}
+	}
+
+	//文字和分数
+	settextstyle(40,0,"微软雅黑");
+	outtextxy(UI_X,UI_Y + 150,"分数");
+	char fs[16] = {0};
+	sprintf_s(fs,"%d",score);
+	outtextxy(UI_X,UI_Y + 200,fs);
+	outtextxy(UI_X,UI_Y + 250,"等级");
+	char dj[16] = { 0 };
+	sprintf_s(dj, "%d", level);
+	outtextxy(UI_X, UI_Y + 300, dj);
 	return 0;
 }
 
@@ -404,8 +447,7 @@ int ELS::clearLine()
 					gamemap_color[i][x] = gamemap_color[i - 1][x];
 				}
 			}
-
-			return 0;
+			score++;
 		}
 	}
 	return 0;
